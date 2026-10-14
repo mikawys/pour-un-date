@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Une petite question 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#ffe3ee; --bg2:#ffc2d9; --card:rgba(255,255,255,.85); --text:#7a2147;
+  --accent:#ff4d8d; --accent2:#ff8fb8; --muted:#b0668a; --shadow:rgba(255,77,141,.35);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg1:#2a1020;--bg2:#4a1634;--card:rgba(50,20,40,.85);--text:#ffd6e6;--muted:#e79ac0;--shadow:rgba(255,77,141,.25)}
+}
+:root[data-theme="dark"]{--bg1:#2a1020;--bg2:#4a1634;--card:rgba(50,20,40,.85);--text:#ffd6e6;--muted:#e79ac0;--shadow:rgba(255,77,141,.25)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;height:100%;min-height:100vh;overflow:hidden;font-family:'Quicksand',system-ui,sans-serif;color:var(--text);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:16px}
+.hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.heart{position:absolute;bottom:-40px;animation:rise linear forwards;opacity:.8}
+@keyframes rise{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+.card{position:relative;z-index:2;width:100%;max-width:380px;text-align:center;background:var(--card);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:32px;padding:34px 24px 30px;
+  box-shadow:0 20px 50px var(--shadow);animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.emoji{font-size:84px;line-height:1;display:inline-block;animation:bounce 1.6s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-10px) scale(1.06)}}
+h1{font-family:'Pacifico',cursive;font-weight:400;font-size:28px;margin:14px 0 6px;color:var(--accent);line-height:1.3}
+p{margin:0 0 22px;color:var(--muted);font-weight:700;min-height:1.4em}
+.btns{display:flex;gap:14px;justify-content:center;align-items:center;min-height:64px}
+button{font-family:inherit;font-weight:700;border:0;border-radius:999px;cursor:pointer;transition:transform .15s}
+#yes{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:18px;padding:14px 30px;
+  box-shadow:0 8px 20px var(--shadow)}
+#yes:active{transform:scale(.95)}
+#no{background:var(--card);color:var(--muted);font-size:16px;padding:12px 24px;border:2px solid var(--accent2)}
+#no.run{position:fixed;z-index:5}
+.hidden{display:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.opt{background:var(--card);color:var(--text);border:2px solid var(--accent2);font-size:15px;padding:14px 8px;border-radius:20px;line-height:1.3}
+.opt:active,.opt:hover{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;transform:scale(1.04)}
+.opt.wide{grid-column:1/-1}
+#other{margin-top:14px}
+textarea{width:100%;min-height:90px;border-radius:18px;border:2px solid var(--accent2);padding:12px;font:inherit;font-weight:500;
+  background:var(--card);color:var(--text);resize:none}
+.send{margin-top:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;padding:13px 26px;box-shadow:0 8px 20px var(--shadow)}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0;min-height:0}
+#win .emoji{font-size:96px}
+.sub{font-size:17px;color:var(--text);font-weight:700;margin-top:6px}
+.confetti{position:fixed;top:-30px;z-index:10;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.emoji,.heart{animation:none}}
+</style>
+</head>
+<body>
+<div class="hearts" id="hearts"></div>
+
+<div class="card" id="ask">
+  <div class="emoji" id="face">🥺</div>
+  <h1 id="title"></h1>
+  <p id="msg"></p>
+  <div class="btns">
+    <button id="yes">Oui 💖</button>
+    <button id="no">Non</button>
+  </div>
+</div>
+
+<div class="card hidden" id="mid">
+  <div class="emoji">🥰</div>
+  <h1 id="midT">Yesss !!</h1>
+  <p class="sub" id="midP">Je savais que tu dirais oui 💕<br>Mais j'ai une 2e question…</p>
+</div>
+
+<div class="card hidden" id="ideal">
+  <div class="emoji">🌸</div>
+  <h1>Ton date idéal ?</h1>
+  <p>Qu'est-ce que tu aimerais faire avec moi ?</p>
+  <div class="opts" id="opts"></div>
+  <div id="other" class="hidden">
+    <textarea id="idea" placeholder="Dis-moi tout, je t'écoute… 💌"></textarea>
+    <button class="send" id="send">Envoyer mon idée 💌</button>
+    <p class="note">Ton application mail va s'ouvrir, il te suffira d'appuyer sur « Envoyer » 😊</p>
+  </div>
+</div>
+
+<div class="card hidden" id="win">
+  <div class="emoji">💍</div>
+  <h1>Elle a dit OUI !!</h1>
+  <p class="sub" id="pick"></p>
+  <p class="sub">Date confirmé, et on rendra ça officiel 💖<br>Pour la vie 🥹✨<br><br>📸 Fais une capture d'écran et envoie-la moi !</p>
+</div>
+
+<script>
+// ✏️ Change le prénom ici (ou ajoute ?nom=Léa à la fin du lien)
+var PRENOM = "toi";
+try{var q=new URLSearchParams(location.search).get('nom');if(q)PRENOM=q.slice(0,30);}catch(e){}
+
+var Q = [
+  { face:"🥺", title:"Hey "+PRENOM+"… 💕", msg:"Veux-tu sortir avec moi pour un date ?", yes:"Oui, avec plaisir 💖",
+    steps:[
+      ["😳","Tu es sûre ? Réfléchis bien…","Regarde comme le bouton Oui est beau"],
+      ["😢","Allez, juste un petit date ?","Je te promets un super moment"],
+      ["🥹","Mon cœur est en train de craquer…","Il reste un seul bon choix 👀"],
+      ["😭","Pitié, dis oui !!","Le bouton Non est timide, il se cache"]
+    ]},
+  { face:"💍", title:"Dernière question…", msg:"Lors de ce date, accepterais-tu qu'on rende ça officiel… et pour la vie ?", yes:"Oui, pour la vie 💍",
+    steps:[
+      ["😳","Hein ? Tu hésites ?!","Réfléchis bien à ta réponse…"],
+      ["🥺","Même pas un petit peu ?","Regarde, le Oui est tout en haut du podium"],
+      ["😭","Tu me brises le cœur…","Il n'y a qu'une bonne réponse 👀"],
+      ["💔","S'il te plaît !!","Le Non a pris la fuite pour toujours"]
+    ]}
+];
+var cur=0, tries=0;
+var yes=document.getElementById('yes'), no=document.getElementById('no');
+var face=document.getElementById('face'), title=document.getElementById('title'), msg=document.getElementById('msg');
+
+function show(i){
+  var d=Q[i]; cur=i; tries=0;
+  face.textContent=d.face; title.textContent=d.title; msg.textContent=d.msg; yes.textContent=d.yes;
+  yes.style.fontSize=''; yes.style.padding='';
+  no.classList.remove('run'); no.removeAttribute('style');
+  document.getElementById('ask').classList.remove('hidden');
+}
+function dodge(e){
+  if(e){e.preventDefault();}
+  tries++;
+  var st=Q[cur].steps, s=st[Math.min(tries-1,st.length-1)];
+  face.textContent=s[0]; title.textContent=s[1]; msg.textContent=s[2];
+  yes.style.fontSize=Math.min(18+tries*5,50)+'px';
+  yes.style.padding=(14+tries*3)+'px '+(26+tries*6)+'px';
+  no.classList.add('run');
+  var w=no.offsetWidth,h=no.offsetHeight;
+  no.style.left=(Math.random()*(window.innerWidth-w-24)+12)+'px';
+  no.style.top=(Math.random()*(window.innerHeight-h-24)+12)+'px';
+  no.style.transform='scale('+Math.max(1-tries*.07,.55)+')';
+}
+no.addEventListener('mouseenter',dodge);
+no.addEventListener('touchstart',dodge,{passive:false});
+no.addEventListener('click',dodge);
+
+function floaty(){
+  var h=document.createElement('div');
+  h.className='heart';
+  h.textContent=['💗','💕','💖','🌸','✨'][Math.floor(Math.random()*5)];
+  var d=6+Math.random()*6;
+  h.style.left=Math.random()*100+'vw';
+  h.style.fontSize=(14+Math.random()*22)+'px';
+  h.style.animationDuration=d+'s';
+  document.getElementById('hearts').appendChild(h);
+  setTimeout(function(){h.remove()},d*1000);
+}
+setInterval(floaty,500);
+for(var i=0;i<8;i++)setTimeout(floaty,i*120);
+
+function confetti(){
+  var items=['💖','🎉','💕','✨','🌸','💗','🥰'];
+  for(var i=0;i<70;i++){
+    (function(i){setTimeout(function(){
+      var c=document.createElement('div');
+      c.className='confetti';
+      c.textContent=items[Math.floor(Math.random()*items.length)];
+      c.style.left=Math.random()*100+'vw';
+      c.style.fontSize=(18+Math.random()*26)+'px';
+      var d=2.5+Math.random()*2.5;
+      c.style.animationDuration=d+'s';
+      document.body.appendChild(c);
+      setTimeout(function(){c.remove()},d*1000);
+    },i*40)})(i);
+  }
+}
+
+// ✏️ Ton email (pour recevoir sa proposition "Autre")
+var EMAIL = "ton.email@exemple.com";
+// ✏️ Tes propositions de date
+var DATES = ["🍝 Un petit resto","🎬 Un ciné","🌳 Balade & pique-nique","🎳 Bowling / mini-golf","☕ Café & discussion","🎡 Fête foraine"];
+
+var opts=document.getElementById('opts');
+DATES.forEach(function(t){
+  var b=document.createElement('button'); b.className='opt'; b.textContent=t;
+  b.addEventListener('click',function(){finish(t);});
+  opts.appendChild(b);
+});
+var ob=document.createElement('button'); ob.className='opt wide'; ob.textContent='✨ Autre idée…';
+ob.addEventListener('click',function(){
+  ob.classList.add('hidden'); document.getElementById('other').classList.remove('hidden');
+  document.getElementById('idea').focus();
+});
+opts.appendChild(ob);
+
+function swap(from,to){document.getElementById(from).classList.add('hidden');document.getElementById(to).classList.remove('hidden');}
+function finish(txt){
+  document.getElementById('pick').textContent='Ton date idéal : '+txt+' 🥰';
+  swap('ideal','win'); confetti(); setTimeout(confetti,1800);
+}
+document.getElementById('send').addEventListener('click',function(){
+  var t=document.getElementById('idea').value.trim();
+  if(!t){document.getElementById('idea').focus();return;}
+  var sub=encodeURIComponent('Mon date idéal 💕');
+  var body=encodeURIComponent('Coucou ! Mon date idéal :\n\n'+t+'\n\n(Et oui pour tout le reste 😘)');
+  window.location.href='mailto:'+EMAIL+'?subject='+sub+'&body='+body;
+  finish(t);
+});
+
+yes.addEventListener('click',function(){
+  no.classList.remove('run'); no.removeAttribute('style');
+  document.getElementById('ask').classList.add('hidden');
+  confetti();
+  var mid=document.getElementById('mid');
+  if(cur===0){
+    mid.classList.remove('hidden');
+    setTimeout(function(){mid.classList.add('hidden');show(1);},2400);
+  } else {
+    document.getElementById('midT').textContent='Mon cœur va exploser 🥹';
+    document.getElementById('midP').innerHTML='Merci, tu me rends tellement heureux 💍<br>Dernière question, promis…';
+    mid.classList.remove('hidden');
+    setTimeout(function(){mid.classList.add('hidden');document.getElementById('ideal').classList.remove('hidden');},2600);
+  }
+});
+show(0);
+</script>
+</body>
+</html>
